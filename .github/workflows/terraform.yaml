@@ -67,5 +67,20 @@ jobs:
           IMAGE_TAG: ${{ github.sha }} # Tags container with unique Git commit hash
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./apps/anubis-api
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAGi
+
+    # ... leave the top of your .github/workflows/terraform.yaml exactly the same ...
+
+      - name: Verify Code Syntax
+        run: terraform init && terraform validate
+
+      # 🚀 UPDATED: Run plan on Pull Requests, but run APPLY on live main branch pushes!
+      - name: Deploy Live Infrastructure to AWS
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            terraform apply -input=false -auto-approve -no-color
+          else
+            terraform plan -input=false -no-color
+          fi
+
 
