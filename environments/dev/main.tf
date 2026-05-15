@@ -51,7 +51,7 @@ variable "private_data_subnet_az1_cidr" { type = string }
 variable "private_data_subnet_az2_cidr" { type = string }
 variable "ssl_certificate_arn"          { type = string }
 variable "operator_email"               { type = string }
-variable "launch_template_name"         { type = string }
+
 variable "ec2_image_id"                 { type = string }
 variable "ec2_instance_type"            { type = string }
 variable "ec2_key_pair_name"            { type = string }
