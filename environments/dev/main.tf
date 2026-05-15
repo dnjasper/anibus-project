@@ -56,7 +56,7 @@ variable "ec2_image_id"                 { type = string }
 variable "ec2_instance_type"            { type = string }
 variable "ec2_key_pair_name"            { type = string }
 variable "domain_name"                  { type = string }
-variable "alternative_names"            { type = string }
+
 
 # ==============================================================================
 # 4. MODULE RUNNER (Passes your live data down to the shared blueprint folder)
@@ -88,5 +88,5 @@ module "eks" {
   # 🔗 THE HANDSHAKE: We pipe the outputs of the VPC module straight into the EKS slots!
   vpc_id     = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnet_ids
-  
+
 }
