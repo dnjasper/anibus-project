@@ -13,3 +13,9 @@ terraform-project/
 
 # AFTER NODE IS UP YOU MUST REFRESH THE .KUBE/CONFIG FILE
 aws eks update-kubeconfig --name my-cluster --region us-east-1
+
+
+If you wish to attempt automatic migration of the state, use "terraform init -migrate-state".
+If you wish to store the current configuration with no changes to the state, use "terraform init -reconfigure".
+
+terraform force-unlock 92e074c8-0f58-7cbe-f0ba-1724ab77b8af

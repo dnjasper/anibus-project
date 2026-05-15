@@ -11,3 +11,4 @@ crash.log
 # Ignore CLI configuration files
 .terraform.lock.hcl
 .terraform
+table-of-contents
