@@ -35,7 +35,7 @@ jobs:
       - name: Setup Terraform Binary
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.9.5
+          terraform_version: 1.6.2
 
       # 4. Runs your structural layout validation pass
       - name: Verify Code Syntax
