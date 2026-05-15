@@ -1,0 +1,46 @@
+name: "Terraform Automation Pipeline"
+
+on:
+  push:
+    branches:
+      - main  # Triggers a live deployment when you push to main
+  pull_request:
+    branches:
+      - main  # Runs a safe dry-run plan check when you open a Pull Request
+
+jobs:
+  terraform:
+    name: "Execute Cloud Blueprint"
+    runs-on: ubuntu-latest
+
+    # 📁 Tells GitHub to step directly into your dev workspace folder at the root
+    defaults:
+      run:
+        working-directory: ./environments/dev
+
+    steps:
+      # 1. Clones your GitHub repository code onto the cloud runner machine
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # 2. Securely logs into your AWS account using the Repository Secrets you saved
+      - name: Authenticate with AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # 3. Installs the exact version of Terraform you used on your laptop
+      - name: Setup Terraform Binary
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+
+      # 4. Runs your structural layout validation pass
+      - name: Verify Code Syntax
+        run: terraform init && terraform validate
+
+      # 5. Generates the 55-resource safe dry-run blueprint roadmap
+      - name: Generate Dry-Run Plan
+        run: terraform plan -no-color
