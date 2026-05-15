@@ -31,3 +31,7 @@ variable "private_subnet_ids" {
   type = list(string)
   description = "List of private subnet IDs for the EKS cluster"
 }
+
+# variable "alternative_names" {
+#   type = string
+#   description = "Alternative names for the SSL certificate, such as a wildcard domain (e.g., *.yourdomain.com)"
