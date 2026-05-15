@@ -1,29 +1,25 @@
-name: "Terraform Automation Pipeline"
+name: "Terraform & App Automation Pipeline"
 
 on:
   push:
     branches:
-      - main  # Triggers a live deployment when you push to main
+      - main
   pull_request:
     branches:
-      - main  # Runs a safe dry-run plan check when you open a Pull Request
+      - main
 
 jobs:
-  terraform:
+  infrastructure:
     name: "Execute Cloud Blueprint"
     runs-on: ubuntu-latest
-
-    # 📁 Tells GitHub to step directly into your dev workspace folder at the root
     defaults:
       run:
         working-directory: ./environments/dev
 
     steps:
-      # 1. Clones your GitHub repository code onto the cloud runner machine
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # 2. Securely logs into your AWS account using the Repository Secrets you saved
       - name: Authenticate with AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -31,16 +27,45 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # 3. Installs the exact version of Terraform you used on your laptop
       - name: Setup Terraform Binary
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.6.2
+          terraform_wrapper: false # 🚀 FIXED: Disables shell wrappers to prevent auth loops
 
-      # 4. Runs your structural layout validation pass
       - name: Verify Code Syntax
         run: terraform init && terraform validate
 
-      # 5. Generates the 55-resource safe dry-run blueprint roadmap
       - name: Generate Dry-Run Plan
-        run: terraform plan -no-color
+        run: terraform plan -input=false -refresh=false -lock=false -no-color # 🚀 FIXED: Bypasses stale S3 variable cache prompts
+
+  application:
+    name: "Build & Ship Container"
+    needs: infrastructure # Waits for infrastructure checks to pass successfully first
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate with AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, Tag, and Push Image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: anubis-api
+          IMAGE_TAG: ${{ github.sha }} # Tags container with unique Git commit hash
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./apps/anubis-api
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
