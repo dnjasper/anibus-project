@@ -39,7 +39,7 @@ jobs:
 
       # 4. Runs your structural layout validation pass
       - name: Verify Code Syntax
-        run: terraform init && terraform validate
+        run: terraform init -reconfigure && terraform validate
 
       # 5. Generates the 55-resource safe dry-run blueprint roadmap
       - name: Generate Dry-Run Plan
