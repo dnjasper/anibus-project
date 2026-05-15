@@ -36,7 +36,7 @@ jobs:
       - name: Verify Code Syntax
         run: terraform init && terraform validate
 
-      # 🚀 LIVE RUN: This forces GitHub to actually DEPLOY your resources in AWS instead of just planning!
+      #  LIVE RUN: This forces GitHub to actually DEPLOY your resources in AWS instead of just planning!
       - name: Deploy Live Infrastructure to AWS
         run: terraform apply -input=false -auto-approve -no-color
 
