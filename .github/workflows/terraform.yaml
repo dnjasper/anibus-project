@@ -31,17 +31,18 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.6.2
-          terraform_wrapper: false # 🚀 FIXED: Disables shell wrappers to prevent auth loops
+          terraform_wrapper: false
 
       - name: Verify Code Syntax
         run: terraform init && terraform validate
 
-      - name: Generate Dry-Run Plan
-        run: terraform plan -input=false -refresh=false -lock=false -no-color # 🚀 FIXED: Bypasses stale S3 variable cache prompts
+      # 🚀 LIVE RUN: This forces GitHub to actually DEPLOY your resources in AWS instead of just planning!
+      - name: Deploy Live Infrastructure to AWS
+        run: terraform apply -input=false -auto-approve -no-color
 
   application:
     name: "Build & Ship Container"
-    needs: infrastructure # Waits for infrastructure checks to pass successfully first
+    needs: infrastructure
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
@@ -64,23 +65,8 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: anubis-api
-          IMAGE_TAG: ${{ github.sha }} # Tags container with unique Git commit hash
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./apps/anubis-api
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAGi
-
-    # ... leave the top of your .github/workflows/terraform.yaml exactly the same ...
-
-      - name: Verify Code Syntax
-        run: terraform init && terraform validate
-
-      # 🚀 UPDATED: Run plan on Pull Requests, but run APPLY on live main branch pushes!
-      - name: Deploy Live Infrastructure to AWS
-        run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            terraform apply -input=false -auto-approve -no-color
-          else
-            terraform plan -input=false -no-color
-          fi
-
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
