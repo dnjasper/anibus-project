@@ -1,0 +1,15 @@
+terraform-project/
+│
+|-- main.tf
+├── provider.tf
+├── variables.tf
+├── terraform.tfvars
+├── vpc.tf
+├── security-groups.tf
+├── eks.tf -- module
+├── outputs.tf
+└── versions.tf
+
+
+# AFTER NODE IS UP YOU MUST REFRESH THE .KUBE/CONFIG FILE
+aws eks update-kubeconfig --name my-cluster --region us-east-1
