@@ -19,7 +19,7 @@ ec2_image_id         = "ami-0ccbe661b0facf3a6"
 ec2_instance_type    = "t3.medium" # Keep it cheap for dev
 ec2_key_pair_name    = "terraform-key"
 domain_name          = "yourdomain.com"
-# alternative_names = "*.yourdomain.com"
+
 
 
 #  CLUSTER

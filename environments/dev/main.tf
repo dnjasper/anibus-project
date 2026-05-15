@@ -88,5 +88,5 @@ module "eks" {
   # 🔗 THE HANDSHAKE: We pipe the outputs of the VPC module straight into the EKS slots!
   vpc_id     = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnet_ids
-  #alternative_names = var.alternative_names
+  
 }
